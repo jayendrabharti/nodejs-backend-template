@@ -86,7 +86,7 @@ class AuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7days
             });
 
 
@@ -94,7 +94,7 @@ class AuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 15 * 60 * 1000 // 7 days
+                maxAge: 15 * 60 * 1000 //15 min
             });
 
             return sendSuccess(res, 'Login successful', {
@@ -165,12 +165,12 @@ class AuthController {
         try {
             const { refreshToken } = req.cookies || req.headers['refreshToken'];
 
-            if (!refreshToken) {
-                return sendError(res, "You are not logged in!!", 401);
+            if (refreshToken) {
+                await tokenServices.revokeRefreshToken(refreshToken);
             }
-            await tokenServices.revokeRefreshToken(refreshToken);
 
             res.clearCookie('refreshToken');
+            res.clearCookie('accessToken');
             return sendSuccess(res, 'Logout successful');
         } catch (error) {
             return sendError(res, error.message, 500);
@@ -181,6 +181,7 @@ class AuthController {
         try {
             await tokenServices.revokeAllUserTokens(req.user._id);
             res.clearCookie('refreshToken');
+            res.clearCookie('accessToken');
             return sendSuccess(res, 'Logged out from all devices');
         } catch (error) {
             return sendError(res, error.message, 500);

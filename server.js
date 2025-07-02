@@ -23,11 +23,13 @@ const limiter = rateLimit({
 // Middleware
 app.use(helmet());
 app.use(limiter);
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(errorHandler);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -37,6 +39,9 @@ app.use('/api/user', userRoutes);
 app.get('/health', (req, res) => {
     return sendSuccess(res, "Server is Running");
 });
+
+app.use(errorHandler);
+
 
 const PORT = process.env.PORT || 5000;
 

@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/responseHelpers.js';
 import fs from 'fs';
 import path from 'path';
+import tokenServices from '../services/tokenService.js'
 
 class UserController {
     async getProfile(req, res) {
@@ -55,7 +56,7 @@ class UserController {
     async deleteAccount(req, res) {
         try {
             await User.findByIdAndDelete(req.user._id);
-            await tokenService.revokeAllUserTokens(req.user._id);
+            await tokenServices.revokeAllUserTokens(req.user._id);
 
             res.clearCookie('refreshToken');
             return sendSuccess(res, 'Account deleted successfully');
